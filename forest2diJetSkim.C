@@ -19,7 +19,6 @@ bool arrange(float i, float j) {return (i>j);}
 
 
 void forest2diJetSkim(int nevt=-1, TString trig = "HLT_HIUPCL1SingleEG5NotHF2_v1", TString trig2 = "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1") {  // or "HLT_HIUPCL1SingleEG5NotHF2_v1"
-//void forest2diPhotonSkim_pf_photons_and_jets(int nevt=-1, TString trig = "HLT_HIUPCL1DoubleMuOpenNotHF2_v1" ) {
   
   using namespace std;
   
@@ -35,7 +34,7 @@ void forest2diJetSkim(int nevt=-1, TString trig = "HLT_HIUPCL1SingleEG5NotHF2_v1
   //  TTree *trackTree  = (TTree*)f1->Get("ppTrack/trackTree");
   TTree *t = (TTree*)f1->Get("akPu5PFJetAnalyzer/t");
 
-  TFile* newfile = new TFile(Form("skimmedFiles/upcDiJetSkim2_%s_noptcut.root",trig2.Data()),"recreate");
+  TFile* newfile = new TFile(Form("skimmedFiles/upcDiJetSkim2_%s_etacut1p6_minpt30.root",trig2.Data()),"recreate");
    
   t->AddFriend(HltTree);
   t->AddFriend(hiTree);
@@ -185,6 +184,7 @@ void forest2diJetSkim(int nevt=-1, TString trig = "HLT_HIUPCL1SingleEG5NotHF2_v1
    vector<float> jetpt;
    vector<float>::iterator iter_jetpt;
 
+   Int_t numjt;
    // event loop start
 //   if(nevt == -1) nevt = pfTree->GetEntries();   
    if(nevt == -1) nevt = t->GetEntries(); 
@@ -280,12 +280,28 @@ void forest2diJetSkim(int nevt=-1, TString trig = "HLT_HIUPCL1SingleEG5NotHF2_v1
     jtenergy2[200] = {0};
     jtm2[200] = {0};*/
 
-    int ljInd = -1; float maxjPt = 0;
-    if(nref == 2){
+    Int_t num[200] = {0};
+    numjt = 0;
+    int ljInd = -1; float minjPt = 30;
+    if(nref >= 2){
       for(Int_t a = 0; a != nref; a++)
       {
-        jetpt.push_back(jtpt[a]);
+        TLorentzVector jt;
+        jt.SetPtEtaPhiM( jtpt[a], jteta[a], jtphi[a], jtm[a] );
+        if(TMath::Abs(jteta[a]) < 1.6)
+        {
+          num[a] = 1;
+          numjt += 1;
+          jetpt.push_back(jtpt[a]);
+        }
+        else
+        {
+          num[a] = 0;
+        }
+        //jetpt.push_back(jtpt[a]);
       }
+      if(numjt == 2)
+      {
       sort(jetpt.begin(), jetpt.end(), arrange);
       //cout << nref << " " << jetpt.size() << " " << jetpt[0] << " " << jetpt[1] << " " << jetpt[2] << " " << jetpt[3] << endl;
       for(Int_t b = 0; b != nref; b++)
@@ -323,7 +339,7 @@ void forest2diJetSkim(int nevt=-1, TString trig = "HLT_HIUPCL1SingleEG5NotHF2_v1
       {
         cout << "Not good" << endl;
       }
-      if((jtpt2[0] > maxjPt || jtpt2[1] > maxjPt) && (jtpt2[0] > 0 && jtpt2[1] > 0) && d_phi > 2*TMath::Pi()/3){
+      if((jtpt2[0] > minjPt && jtpt2[1] > minjPt) && (jtpt2[0] > 0 && jtpt2[1] > 0) && d_phi > 2*TMath::Pi()/3){
         //cout << Run << " " << LumiBlock << " " << Event << endl;
         pt[0] = jtpt2[0];
         eta[0] = jteta2[0];
@@ -363,6 +379,11 @@ void forest2diJetSkim(int nevt=-1, TString trig = "HLT_HIUPCL1SingleEG5NotHF2_v1
       {
         continue;
       }
+    }
+    else
+    {
+      continue;
+    }
     }
     else
     {
