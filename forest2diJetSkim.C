@@ -280,6 +280,7 @@ void forest2diJetSkim(int nevt=-1, TString trig = "HLT_HIUPCL1SingleEG5NotHF2_v1
     jtenergy2[200] = {0};
     jtm2[200] = {0};*/
 
+    Int_t njet = 0;
     Int_t num[200] = {0};
     numjt = 0;
     int ljInd = -1; float minjPt = 30;
