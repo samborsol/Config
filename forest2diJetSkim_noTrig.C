@@ -27,11 +27,6 @@ void forest2diJetSkim_noTrig(int nevt=-1) {
   
   using namespace std;
   
-  //  TFile *f1 = new TFile("beomgon_firstForest_PbPb.root");
-//  TFile *f1 = new TFile("/home/samba/Beomgon/4_UPCTriggers_pp_reco.root");
-//  TFile *f1 = new TFile("/home/samba/Beomgon/HLT_HIUPCL1SingleEG5NotHF2_pp_reco.root");
-//  TFile *f1 = new TFile("/home/kbg777/CMSwork/4_UPCTriggers_Beomgon.root");
-//  TFile *f1 = new TFile("/mnt/hadoop/cms/store/user/rbi/merged/dgulhan-Pythia8_Dijet30_pp_TuneCUETP8M1_Hydjet_MinBias_5020GeV_RECODEBUG_758_PrivMC_forest_v28/0.root");
   TFile *f1 = new TFile("/mnt/hadoop/cms/store/user/abaty/mergedForests/PYTHIA_QCD_TuneCUETP8M1_cfi_GEN_SIM_5020GeV_ppSignal/Pythia8_Dijet30_pp_TuneCUETP8M1_5020GeV_FOREST_758_PrivMC/0.root");
 
   TTree *HltTree = (TTree*)f1->Get("hltanalysis/HltTree");
