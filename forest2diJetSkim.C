@@ -1,6 +1,5 @@
 #include <ctime>
 #include <TMath.h>
-
 #include "cutsAndBin_bgk.h"
 #include <TLorentzVector.h>
 #include "commonUtility.h"
@@ -16,35 +15,39 @@ using std::abs;
 static const long MAXTREESIZE = 10000000000;
 
 bool arrange(float i, float j) {return (i>j);}
+TString getDayAndTime();
 
-
-void forest2diJetSkim(int nevt=-1, TString trig = "HLT_HIUPCL1SingleEG5NotHF2_v1", TString trig2 = "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1") {  // or "HLT_HIUPCL1SingleEG5NotHF2_v1"
+void forest2diJetSkim(
+		      TString fname = "/home/kbg777/CMSwork/4_UPCTriggers_Beomgon.root",
+		      TString outputFname = "upcDiJetSkim", 
+		      TString trig = "",  // "HLT_HIUPCL1SingleEG5NotHF2_v1",    // "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1" //  "HLT_HIUPCL1SingleEG5NotHF2_v1"
+		      TString jetCollection = "ak5PFJetAnalyzer", // "akPu5PFJetAnalyzer",
+		      float minjPt = 30,
+		      int nevt=-1
+		      ) {  
   
   using namespace std;
+  TFile *f1 = new TFile(fname.Data());
   
-  //  TFile *f1 = new TFile("beomgon_firstForest_PbPb.root");
-//  TFile *f1 = new TFile("/home/samba/Beomgon/4_UPCTriggers_pp_reco.root");
-//  TFile *f1 = new TFile("/home/samba/Beomgon/HLT_HIUPCL1SingleEG5NotHF2_pp_reco.root");
-  TFile *f1 = new TFile("/home/kbg777/CMSwork/4_UPCTriggers_Beomgon.root");
-
   TTree *HltTree = (TTree*)f1->Get("hltanalysis/HltTree");
+  TTree *hiTree  = (TTree*)f1->Get("hiEvtAnalyzer/HiTree");
+  TTree *t = (TTree*)f1->Get(Form("%s/t",jetCollection.Data()));
+  //  TTree *trackTree  = (TTree*)f1->Get("ppTrack/trackTree");
   //  TTree *akpu5pf = (TTree*)f1->Get("t");
   //  TTree *pfTree  = (TTree*)f1->Get("pfcandAnalyzer/pfTree");
-  TTree *hiTree  = (TTree*)f1->Get("hiEvtAnalyzer/HiTree");
-  //  TTree *trackTree  = (TTree*)f1->Get("ppTrack/trackTree");
-  TTree *t = (TTree*)f1->Get("akPu5PFJetAnalyzer/t");
-
-  TFile* newfile = new TFile(Form("skimmedFiles/upcDiJetSkim3_%s_etacut2p4_minpt20.root",trig2.Data()),"recreate");
+  TString dayTime = getDayAndTime();
+  TFile* newfile = new TFile(Form("%s_trig%s_jetCollection%s_minJetPt%d_%s.root",outputFname.Data(), trig.Data(), jetCollection.Data(), (int)minjPt, dayTime.Data()  ),"recreate");
    
   t->AddFriend(HltTree);
   t->AddFriend(hiTree);
    // import the tree to the RooDataSet
    Int_t           trigBit;
-   Int_t           trigBit2;
    TBranch        *b_trigBit;
-   TBranch        *b_trigBit2;
-   HltTree->SetBranchAddress(trig.Data(), &trigBit, &b_trigBit);
-   HltTree->SetBranchAddress(trig2.Data(), &trigBit2, &b_trigBit2);
+   if (trig == "" ) {  cout << " No Trigger selection! " << endl ;}     
+   else { 
+     HltTree->SetBranchAddress(trig.Data(), &trigBit, &b_trigBit);
+   }
+
    Int_t           Run;
   TBranch        *b_Run;   //!
   HltTree->SetBranchAddress("Run", &Run, &b_Run);
@@ -186,21 +189,24 @@ void forest2diJetSkim(int nevt=-1, TString trig = "HLT_HIUPCL1SingleEG5NotHF2_v1
 
    Int_t numjt;
    // event loop start
-//   if(nevt == -1) nevt = pfTree->GetEntries();   
+   //   if(nevt == -1) nevt = pfTree->GetEntries();   
+
    if(nevt == -1) nevt = t->GetEntries(); 
    for (int iev=0; iev<nevt ; iev++) {
      if(iev%10000==0) 
-              cout << ">>>>> EVENT " << iev << " / " << t->GetEntries() <<  " ("<<(int)(100.*iev/t->GetEntries()) << "%)" << endl; 
+       cout << ">>>>> EVENT " << iev << " / " << t->GetEntries() <<  " ("<<(int)(100.*iev/t->GetEntries()) << "%)" << endl; 
      HltTree->GetEntry(iev);
      jetpt.clear();
-     if ( !trigBit2 ) 
+
+     if ( (trig != "" ) && (!trigBit) ) {
        continue;
+     }
      
      //pfTree->GetEntry(iev);
      hiTree->GetEntry(iev);
      //trackTree->GetEntry(iev);
      t->GetEntry(iev);
-
+     
      // trigger selection 
 
      ///// Call the values /////
@@ -214,11 +220,6 @@ void forest2diJetSkim(int nevt=-1, TString trig = "HLT_HIUPCL1SingleEG5NotHF2_v1
      event.hfplus = hiHFplus; 
      event.hfminus = hiHFminus; 
      
-
-     // Count the number of tracks 
-//     event.nTrk = nTrk;
-     
-//     dp.clear();
      dj.clear();
      
      //leading photon index
@@ -282,7 +283,7 @@ void forest2diJetSkim(int nevt=-1, TString trig = "HLT_HIUPCL1SingleEG5NotHF2_v1
 
     Int_t num[200] = {0};
     numjt = 0;
-    int ljInd = -1; float minjPt = 30;
+    int ljInd = -1;
     if(nref >= 2){
       for(Int_t a = 0; a != nref; a++)
       {
