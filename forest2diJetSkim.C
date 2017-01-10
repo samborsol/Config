@@ -20,9 +20,9 @@ TString getDayAndTime();
 void forest2diJetSkim(
 		      TString fname = "/home/kbg777/CMSwork/4_UPCTriggers_Beomgon.root",
 		      TString outputFname = "upcDiJetSkim", 
-		      TString trig = "",  // "HLT_HIUPCL1SingleEG5NotHF2_v1",    // "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1" //  "HLT_HIUPCL1SingleEG5NotHF2_v1"
-		      TString jetCollection = "ak5PFJetAnalyzer", // "akPu5PFJetAnalyzer",
-		      float minjPt = 30,
+		      TString trig = "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1",  // "HLT_HIUPCL1SingleEG5NotHF2_v1",    // "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1" //  "HLT_HIUPCL1SingleEG5NotHF2_v1"
+		      TString jetCollection = "akPu5PFJetAnalyzer", // "akPu5PFJetAnalyzer",
+		      float minjPt = 20,
 		      int nevt=-1
 		      ) {  
   
@@ -198,7 +198,8 @@ void forest2diJetSkim(
      HltTree->GetEntry(iev);
      jetpt.clear();
 
-     if ( (trig != "" ) && (!trigBit) ) {
+     if ( (trig != "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1" ) && (!trigBit) ) {
+//     if(!trigBit){
        continue;
      }
      
@@ -289,7 +290,7 @@ void forest2diJetSkim(
       {
         TLorentzVector jt;
         jt.SetPtEtaPhiM( jtpt[a], jteta[a], jtphi[a], jtm[a] );
-        if(TMath::Abs(jteta[a]) < 2.4 && jtpt[a] > 20)
+        if(TMath::Abs(jteta[a]) < 2.4 && jtpt[a] > minjPt)
         {
           num[a] = 1;
           numjt += 1;
