@@ -289,7 +289,7 @@ void forest2diJetSkim(
       {
         TLorentzVector jt;
         jt.SetPtEtaPhiM( jtpt[a], jteta[a], jtphi[a], jtm[a] );
-        if(TMath::Abs(jteta[a]) < 2.4 && jtpt[a] > 20)
+        if(TMath::Abs(jteta[a]) < 2.4 && jtpt[a] > minjPt)
         {
           num[a] = 1;
           numjt += 1;
