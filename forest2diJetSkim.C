@@ -20,9 +20,9 @@ TString getDayAndTime();
 void forest2diJetSkim(
 		      TString fname = "/home/kbg777/CMSwork/4_UPCTriggers_Beomgon.root",
 		      TString outputFname = "upcDiJetSkim", 
-		      TString trig = "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1",  // "HLT_HIUPCL1SingleEG5NotHF2_v1",    // "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1" //  "HLT_HIUPCL1SingleEG5NotHF2_v1"
-		      TString jetCollection = "akPu5PFJetAnalyzer", // "akPu5PFJetAnalyzer",
-		      float minjPt = 20,
+		      TString trig = "",  // "HLT_HIUPCL1SingleEG5NotHF2_v1",    // "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1" //  "HLT_HIUPCL1SingleEG5NotHF2_v1"
+		      TString jetCollection = "ak5PFJetAnalyzer", // "akPu5PFJetAnalyzer",
+		      float minjPt = 30,
 		      int nevt=-1
 		      ) {  
   
@@ -198,8 +198,7 @@ void forest2diJetSkim(
      HltTree->GetEntry(iev);
      jetpt.clear();
 
-     if ( (trig != "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1" ) && (!trigBit) ) {
-//     if(!trigBit){
+     if ( (trig != "" ) && (!trigBit) ) {
        continue;
      }
      
