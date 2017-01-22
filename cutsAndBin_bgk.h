@@ -105,11 +105,11 @@ class diJet {
 };
 
 class UPCdiJet {
-  public:
-  UPCdiJet() :
+ public:
+ UPCdiJet() :
   mass(-1), pt(-1), y(999), phi(999), eta(999), dphi(-99), dpt(-99), deta(-99), aj(-99),// 7
-  pt1(-1), eta1(-1), phi1(-1), e1(-1),        // 3
-  pt2(-1), eta2(-1), phi2(-1), e2(-1)        // 3
+  pt1(-1), eta1(-1), phi1(-1),        // 3
+  pt2(-1), eta2(-1), phi2(-1)         // 3
   {}
 
   float mass;
@@ -124,20 +124,47 @@ class UPCdiJet {
   float pt1;
   float eta1;
   float phi1;
-  float e1;
   float pt2;
   float eta2;
   float phi2;
-  float e2;
 
   void clear() {
   mass =-99; pt = -99; y = -99; phi = -99; eta = -99; dphi=-99; dpt=-99; deta=-99; aj=-99;// 7
-  pt1 = -99; eta1 = -99; phi1 = -99; e1 = -99;     // 4
-  pt2 = -99; eta2 = -99; phi2 = -99; e2 = -99;     // 4
+  pt1 = -99; eta1 = -99; phi1 = -99;     // 4
+  pt2 = -99; eta2 = -99; phi2 = -99;     // 4
   }
 
 };
-TString djBranchString = "mass/F:pt:y:phi:eta:dphi:dpt:deta:aj:pt1:eta1:phi1:e1:pt2:eta2:phi2:e2";
+TString djBranchString = "mass/F:pt:y:phi:eta:dphi:dpt:deta:aj:pt1:eta1:phi1:pt2:eta2:phi2";
+
+class UPCnTrk {
+ public:
+ UPCnTrk() :
+  nTrack(-99),
+  nTrketa0to0p5(-99), nTrketa0p5to1(-99), nTrketa1to1p5(-99), nTrketa1p5to2(-99), nTrketa2to2p5(-99),
+  nTrketam0to0p5(-99), nTrketam0p5to1(-99), nTrketam1to1p5(-99), nTrketam1p5to2(-99), nTrketam2to2p5(-99)
+  {}
+
+  int nTrack;
+  int nTrketa0to0p5;
+  int nTrketa0p5to1;
+  int nTrketa1to1p5;
+  int nTrketa1p5to2;
+  int nTrketa2to2p5;
+  int nTrketam0to0p5;
+  int nTrketam0p5to1;
+  int nTrketam1to1p5;
+  int nTrketam1p5to2;
+  int nTrketam2to2p5;
+
+  void clear() {
+  nTrack = -99;
+  nTrketa0to0p5 = -99; nTrketa0p5to1 = -99; nTrketa1to1p5 = -99; nTrketa1p5to2 = -99; nTrketa2to2p5 = -99;
+  nTrketam0to0p5 = -99; nTrketam0p5to1 = -99; nTrketam1to1p5 = -99; nTrketam1p5to2 = -99; nTrketam2to2p5 = -99;
+  }
+
+};
+TString nTrkString = "nTrk/I:nTrketa0to0p5:nTrketa0p5to1:nTrketa1to1p5:nTrketa1p5to2:nTrketa2to2p5:nTrketam0to0p5:nTrketam0p5to1:nTrketam1to1p5:nTrketam1p5to2:nTrketam2to2p5"; 
 
 class UPCEvent { 
  public:
@@ -149,7 +176,7 @@ class UPCEvent {
   int lumi;
   int event;
   int nPho;
-  int nTrk;
+  float nTrk;
   float hfsum;
   float hfplus;
   float hfminus;
