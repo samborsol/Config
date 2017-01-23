@@ -60,10 +60,6 @@ TString getEPSel( int eventPln) {
   else return "none";
 }
 
-
-
-
-
 class diJet { 
  public:
  diJet() :
@@ -107,11 +103,12 @@ class diJet {
 class UPCdiJet {
  public:
  UPCdiJet() :
-  mass(-1), pt(-1), y(999), phi(999), eta(999), dphi(-99), dpt(-99), deta(-99), aj(-99),// 7
+  nJet(-1), mass(-1), pt(-1), y(999), phi(999), eta(999), dphi(-99), dpt(-99), deta(-99), aj(-99),// 7
   pt1(-1), eta1(-1), phi1(-1),        // 3
   pt2(-1), eta2(-1), phi2(-1)         // 3
   {}
 
+  int nJet;
   float mass;
   float pt;
   float y;
@@ -129,13 +126,13 @@ class UPCdiJet {
   float phi2;
 
   void clear() {
-  mass =-99; pt = -99; y = -99; phi = -99; eta = -99; dphi=-99; dpt=-99; deta=-99; aj=-99;// 7
+  nJet = -1; mass = -99; pt = -99; y = -99; phi = -99; eta = -99; dphi=-99; dpt=-99; deta=-99; aj=-99;// 7
   pt1 = -99; eta1 = -99; phi1 = -99;     // 4
   pt2 = -99; eta2 = -99; phi2 = -99;     // 4
   }
 
 };
-TString djBranchString = "mass/F:pt:y:phi:eta:dphi:dpt:deta:aj:pt1:eta1:phi1:pt2:eta2:phi2";
+TString djBranchString = "nJet/I:mass/F:pt:y:phi:eta:dphi:dpt:deta:aj:pt1:eta1:phi1:pt2:eta2:phi2";
 
 class UPCnTrk {
  public:
