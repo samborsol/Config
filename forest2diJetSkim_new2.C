@@ -1,4 +1,4 @@
-#include <ctime>
+0;95;0c#include <ctime>
 #include <TMath.h>
 #include "cutsAndBin_bgk.h"
 #include <TLorentzVector.h>
@@ -18,13 +18,13 @@ bool arrange(float i, float j) {return (i>j);}
 TString getDayAndTime();
 
 void forest2diJetSkim_new2(
-		      TString fname = "/u/user/bekim/758p3_UPC/src/Muon_test/4_UPCTriggers_170119.root",
-		      TString outputFname = "upcDiJetSkim170123", 
-		      TString trig = "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1",  // "HLT_HIUPCL1SingleEG5NotHF2_v1",    // "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1" //  "HLT_HIUPCL1SingleEG5NotHF2_v1"
-		      TString jetCollection = "ak5PFJetAnalyzer", // "akPu5PFJetAnalyzer",
-		      float minjPt = 0,
-		      int nevt=-1
-		      ) {  
+			   TString fname = "Hiforest_fraction.root",
+			   TString outputFname = "upcDiJetSkim170124", 
+			   TString trig = "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1",  // "HLT_HIUPCL1SingleEG5NotHF2_v1",    // "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1" //  "HLT_HIUPCL1SingleEG5NotHF2_v1"
+			   TString jetCollection = "ak5PFJetAnalyzer", // "akPu5PFJetAnalyzer",
+			   float minjPt = 0,
+			   int nevt=-1
+			   ) {  
   
   using namespace std;
   TFile *f1 = new TFile(fname.Data());
@@ -191,18 +191,19 @@ void forest2diJetSkim_new2(
    UPCnTrk Track;
    TTree *trkTree = new TTree("Track","Track Tree");
    trkTree->SetMaxTreeSize(MAXTREESIZE);
-   trkTree->Branch("track",&Track.nTrack,nTrkString);
+   trkTree->Branch("trkVar",&Track.nTrack,nTrkString);
 
    int ntrk;
    const int MAXtrk = 50000; // to accomodate 100 smeared trks, need to be careful with ram
    float trkpt[MAXtrk];
    float trketa[MAXtrk];
 
-   TTree *newtrkTree = new TTree("Track2","Track Tree 2");
+   TTree *newtrkTree = new TTree("fullTrkTree","Track Tree 2");
    newtrkTree->SetMaxTreeSize(MAXTREESIZE);
    newtrkTree->Branch("ntrk",&ntrk,"ntrk/I");
    newtrkTree->Branch("pt",trkpt,"pt[ntrk]/F");
    newtrkTree->Branch("eta",trketa,"eta[ntrk]/F");
+   newtrkTree->Branch("phi",trkphi,"phi[ntrk]/F");
 
    Int_t d_phi;
 
@@ -245,67 +246,83 @@ void forest2diJetSkim_new2(
      dj.clear();
 
      Track.clear();
-     Track.nTrack = nTrk;
-
-     //Track2->clear();
-     ntrk = nTrk;
-
+     Track.nTrack = 0;
+     ntrk = 0 ;
      for(Int_t c = 0; c != nTrk; c++)
      {
-       trkpt[c] = trkPt[c];
-       trketa[c] = trkEta[c];
+       // Yongsun:  Here is where the quality cuts of trak will enter.
+       // pt cut
+       //  pTerr/pt cut etc etc.
+       if ( fabs(trkEta[c])> 2.4 ) 
+	 continue;   // eta cut 
+       //
+       //
+       //
+       // From now you should not make any cut below :
+
+       trketa[ntrk] = trkEta[c];
+       trkphi[ntrk] = trkPhi[c];
+       trkpt[ntrk] = trkPt[c];
+       ntrk = ntrk + 1 ;
+
+       Track.nTrack = Track.nTrack + 1;
+
+       if(trkEta[c] >= -2.5 && trkEta[c] < -2.0)
+	 {
+	   Track.nTrketam2to2p5 = Track.nTrketam2to2p5+ 1 ;
+	 }
+       else if(trkEta[c] >= -2 && trkEta[c] < -1.5)
+	 {
+	   Track.nTrketam1p5to2 = Track.nTrketam1p5to2+1;
+	 }
+
        if(trkEta[c] >= -2.5 && trkEta[c] < -2.0)
        {
-         Track.nTrketam2to2p5 = nTrk;
+         Track.nTrketam2to2p5 = Track.nTrketam2to2p5 + 1;
        }
        else if(trkEta[c] >= -2 && trkEta[c] < -1.5)
        {
-         Track.nTrketam1p5to2 = nTrk;
+         Track.nTrketam1p5to2 = Track.nTrketam1p5to2 + 1; 
        }
        else if(trkEta[c] >= -1.5 && trkEta[c] < -1.0)
        {
-         Track.nTrketam1to1p5 = nTrk;
+         Track.nTrketam1to1p5 = Track.nTrketam1to1p5 + 1 ;
        }
        else if(trkEta[c] >= -1.0 && trkEta[c] < -0.5)   
        {
-         Track.nTrketam0p5to1 = nTrk;     
+         Track.nTrketam0p5to1 = Track.nTrketam0p5to1 + 1;    
        }
        else if(trkEta[c] >= -0.5 && trkEta[c] < 0.0)
        {
-         Track.nTrketam0to0p5 = nTrk;
+         Track.nTrketam0to0p5 = Track.nTrketam0to0p5 + 1;
        }
        else if(trkEta[c] >= 0.0 && trkEta[c] < 0.5)
        {
-         Track.nTrketa0to0p5 = nTrk;
+         Track.nTrketa0to0p5 = Track.nTrketa0to0p5 + 1;
        }
        else if(trkEta[c] >= 0.5 && trkEta[c] < 1.0)
        {
-         Track.nTrketa0p5to1 = nTrk;
+         Track.nTrketa0p5to1 = Track.nTrketa0p5to1 + 1 ;
        }
        else if(trkEta[c] >= 1.0 && trkEta[c] < 1.5)
        {
-         Track.nTrketa1to1p5 = nTrk;
+         Track.nTrketa1to1p5 = Track.nTrketa1to1p5 +1 ;
        }
        else if(trkEta[c] >= 1.5 && trkEta[c] < 2.0)
        {
-         Track.nTrketa1p5to2 = nTrk;
+         Track.nTrketa1p5to2 = Track.nTrketa1p5to2 + 1 ;
        }
        else if(trkEta[c] >= 2.0 && trkEta[c] < 2.5)
        {
-         Track.nTrketa2to2p5 = nTrk;
+         Track.nTrketa2to2p5 = Track.nTrketa2to2p5 + 1 ;
        }
-       else
-       {
-         continue;
-       }
-     } 
+
+     }
 
     Int_t num[200] = {0};
     numjt = 0;
     int ljInd = -1;
-    //if(nref >= 2)
-    {
-      for(Int_t a = 0; a != nref; a++)
+    for(Int_t a = 0; a != nref; a++)
       {
         TLorentzVector jt;
         jt.SetPtEtaPhiM( jtpt[a], jteta[a], jtphi[a], jtm[a] );
@@ -357,9 +374,9 @@ void forest2diJetSkim_new2(
       }
       //cout << "d_phi : " << d_phi << endl;
       if(d_phi > 3.141592653589)
-      {
-        cout << "Not good" << endl;
-      }
+	{
+	  cout << "Not good" << endl;
+	}
       //cout << Run << " " << LumiBlock << " " << Event << endl;
       pt[0] = jtpt2[0];
       eta[0] = jteta2[0];
@@ -371,12 +388,12 @@ void forest2diJetSkim_new2(
       phi[1] = jtphi2[1];
       //e[1] = jtenergy2[1];
       mass[1] = jtm2[1];
-         
+      
       TLorentzVector jt1vec, jt2vec, djvec;
       jt1vec.SetPtEtaPhiM( pt[0], eta[0], phi[0], mass[0] );
       jt2vec.SetPtEtaPhiM( pt[1], eta[1], phi[1], mass[1] );
       djvec = jt1vec + jt2vec ;
-
+      
       dj.nJet = nref;
       dj.mass = djvec.M();
       dj.pt   = djvec.Pt();
@@ -395,7 +412,7 @@ void forest2diJetSkim_new2(
       dj.eta2 = eta[1];
       dj.phi2 = phi[1];
       //dj.e2 = e[1];
-    }
+      }
     //else
     //{
     //  continue;
