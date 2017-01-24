@@ -208,6 +208,9 @@ void forest2diJetSkim_new2(
    Int_t d_phi;
 
    vector<float> jetpt;
+   vector<float> jeteta;
+   vector<float> jetphi;
+   vector<float> jetmass;
    vector<float>::iterator iter_jetpt;
 
    Int_t numjt;
@@ -222,8 +225,8 @@ void forest2diJetSkim_new2(
        cout << ">>>>> EVENT " << iev << " / " << t->GetEntries() <<  " ("<<(int)(100.*iev/t->GetEntries()) << "%)" << endl; 
      }
      HltTree->GetEntry(iev);
-     jetpt.clear();
 
+   
      if ( (trig != "" ) && (!trigBit) ) {
        continue;
      }
@@ -251,9 +254,8 @@ void forest2diJetSkim_new2(
      for(Int_t c = 0; c != nTrk; c++)
      {
        // Yongsun:  Here is where the quality cuts of trak will enter.
-       // pt cut
-       //  pTerr/pt cut etc etc.
-       if ( fabs(trkEta[c])> 2.4 ) 
+       //  pt cutk, pTerr/pt cut, etc etc in near fugure.  ask Daniel and Sasha which track quality cut you have you have to use.  
+       if ( fabs(trkEta[c])> 2.5 ) 
 	 continue;   // eta cut 
        //
        //
@@ -266,15 +268,6 @@ void forest2diJetSkim_new2(
        ntrk = ntrk + 1 ;
 
        Track.nTrack = Track.nTrack + 1;
-
-       if(trkEta[c] >= -2.5 && trkEta[c] < -2.0)
-	 {
-	   Track.nTrketam2to2p5 = Track.nTrketam2to2p5+ 1 ;
-	 }
-       else if(trkEta[c] >= -2 && trkEta[c] < -1.5)
-	 {
-	   Track.nTrketam1p5to2 = Track.nTrketam1p5to2+1;
-	 }
 
        if(trkEta[c] >= -2.5 && trkEta[c] < -2.0)
        {
@@ -318,60 +311,71 @@ void forest2diJetSkim_new2(
        }
 
      }
+     
+     numjt = 0;
 
-    Int_t num[200] = {0};
-    numjt = 0;
-    int ljInd = -1;
-    for(Int_t a = 0; a != nref; a++)
-      {
-        TLorentzVector jt;
-        jt.SetPtEtaPhiM( jtpt[a], jteta[a], jtphi[a], jtm[a] );
-        //if(TMath::Abs(jteta[a]) < 2.4 && jtpt[a] > minjPt)
-        {
-          num[a] = 1;
-          numjt += 1;
-          jetpt.push_back(jtpt[a]);
-        }
-        //else
-        //{
-        //  num[a] = 0;
-        //}
-        //jetpt.push_back(jtpt[a]);
-      }
-      //if(numjt == 2)
-      {
-      sort(jetpt.begin(), jetpt.end(), arrange);
-      //cout << nref << " " << jetpt.size() << " " << jetpt[0] << " " << jetpt[1] << " " << jetpt[2] << " " << jetpt[3] << endl;
-      for(Int_t b = 0; b != nref; b++)
-      {
-        if(jtpt[b] == jetpt[0])
-        {
-          jtpt2[0] = jtpt[b];
-          jteta2[0] = jteta[b];
-          jtphi2[0] = jtphi[b];
-          //jtenergy2[0] = jtenergy[b];
-          jtm2[0] = jtm[b];
-        }
-        else if(jtpt[b] == jetpt[1])
-        {
-          jtpt2[1] = jtpt[b];
-          jteta2[1] = jteta[b];
-          jtphi2[1] = jtphi[b];
-          //jtenergy2[1] = jtenergy[b];
-          jtm2[1] = jtm[b];
-        }
-        else
-        {
-          continue;
-        }
-      }
-      //cout << jtpt2[0] << " " << jtpt2[1] << endl;
-      d_phi = 0;
-      d_phi = TMath::Abs(getDPHI(jtphi2[0], jtphi2[1]));
+     jetpt.clear();
+     jeteta.clear();
+     jetphi.clear();
+     jetmass.clear();
+
+     for(Int_t a = 0; a != nref; a++)      {
+       TLorentzVector jt;
+       jt.SetPtEtaPhiM( jtpt[a], jteta[a], jtphi[a], jtm[a] );
+       // some jet cuts 
+       //if(TMath::Abs(jteta[a]) < 2.4 && jtpt[a] > minjPt)
+       //
+       if(TMath::Abs(jteta[a]) > 2.4) // Should still have eta cut 
+	 conitnue ;
+       
+       // From here now, do not introduce any other cuts until the loop is over. 
+       jetpt.push_back(jtpt[a]);
+       jeteta.push_back(jteta[a]);
+       jetphi.push_back(jtphi[a]);
+       jetmass.push_back(jtmass[a]);
+       numjt += 1;
+     }
+     
+     if ( numjt == 0 )  { 
+       jtpt2[0] = -1 ;
+       jtpt2[1] = -1 ;
+
+     }
+     else if ( numjt == 1 ) { 
+       jtpt2[0] = jetpt[0];
+       jteta2[0] = jeteta[0];
+       jtphi2[0] = jetphi[0];
+       jtm2[0]   = jetmass[0];
+
+       jtpt2[1] = -1 ;
+
+     }
+     else {     // if numjt > 1 
+       sort(jetpt.begin(), jetpt.end(), arrange);
+       //cout << nref << " " << jetpt.size() << " " << jetpt[0] << " " << jetpt[1] << " " << jetpt[2] << " " << jetpt[3] << endl;
+       for(Int_t b = 0; b != nref; b++)      {
+	 if(jtpt[b] == jetpt[0])
+	   {
+	     jtpt2[0] = jtpt[b];
+	     jteta2[0] = jteta[b];
+	     jtphi2[0] = jtphi[b];
+	     jtm2[0] = jtm[b];
+	   }
+	 else if(jtpt[b] == jetpt[1])	{
+	   jtpt2[1] = jtpt[b];
+	   jteta2[1] = jteta[b];
+	   jtphi2[1] = jtphi[b];
+	jtm2[1] = jtm[b];
+	 }
+       }
+     }
+     
+     d_phi = 0;
+     d_phi = TMath::Abs(getDPHI(jtphi2[0], jtphi2[1]));
       if(d_phi > TMath::Pi())
-      {
-        d_phi = 2 * 3.141592653589 - d_phi;
-      }
+	{
+	  d_phi = 2 * 3.141592653589 - d_phi;
+	}
       //cout << "d_phi : " << d_phi << endl;
       if(d_phi > 3.141592653589)
 	{
@@ -412,22 +416,14 @@ void forest2diJetSkim_new2(
       dj.eta2 = eta[1];
       dj.phi2 = phi[1];
       //dj.e2 = e[1];
-      }
-    //else
-    //{
-    //  continue;
-    //}
-    }
-    //else
-    //{
-    // continue;
-    //}
-    eventTree->Fill();
-    djTree->Fill();
-    trkTree->Fill();   
-    newtrkTree->Fill(); 
-    jetpt.clear(); 
-   } //end of event loop
+   }
+
+   eventTree->Fill();
+   djTree->Fill();
+   trkTree->Fill();   
+   newtrkTree->Fill(); 
+   jetpt.clear(); 
+} //end of event loop
    // *==*==*==*==*==*==* Output file  *==*==*==*==*==*==* //
 //   cout << numevt << endl;
    newtrkTree->Write();
