@@ -155,9 +155,9 @@ class UPCnTrk {
   int nTrketam2to2p5;
 
   void clear() {
-  nTrack = -99;
-  nTrketa0to0p5 = -99; nTrketa0p5to1 = -99; nTrketa1to1p5 = -99; nTrketa1p5to2 = -99; nTrketa2to2p5 = -99;
-  nTrketam0to0p5 = -99; nTrketam0p5to1 = -99; nTrketam1to1p5 = -99; nTrketam1p5to2 = -99; nTrketam2to2p5 = -99;
+  nTrack = 0;
+  nTrketa0to0p5 = 0; nTrketa0p5to1 = 0; nTrketa1to1p5 = 0; nTrketa1p5to2 = 0; nTrketa2to2p5 = 0;
+  nTrketam0to0p5 = 0; nTrketam0p5to1 = 0; nTrketam1to1p5 = 0; nTrketam1p5to2 = 0; nTrketam2to2p5 = 0;
   }
 
 };
