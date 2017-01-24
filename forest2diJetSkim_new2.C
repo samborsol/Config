@@ -1,4 +1,4 @@
-0;95;0c#include <ctime>
+#include <ctime>
 #include <TMath.h>
 #include "cutsAndBin_bgk.h"
 #include <TLorentzVector.h>
@@ -161,12 +161,15 @@ void forest2diJetSkim_new2(
 
    Int_t           nTrk;
    Float_t         trkEta[33885];
+   Float_t         trkPhi[33885];
    Float_t         trkPt[33885];
    TBranch        *b_nTrk;   //!
    TBranch        *b_trkEta;
+   TBranch        *b_trkPhi;
    TBranch        *b_trkPt;
    trackTree->SetBranchAddress("nTrk", &nTrk, &b_nTrk);
    trackTree->SetBranchAddress("trkEta", trkEta, &b_trkEta);
+   trackTree->SetBranchAddress("trkPhi", trkPhi, &b_trkPhi);
    trackTree->SetBranchAddress("trkPt", trkPt, &b_trkPt);
 
   ////////////////////////////////////////////////////////////////////////
@@ -197,6 +200,7 @@ void forest2diJetSkim_new2(
    const int MAXtrk = 50000; // to accomodate 100 smeared trks, need to be careful with ram
    float trkpt[MAXtrk];
    float trketa[MAXtrk];
+   float trkphi[MAXtrk];
 
    TTree *newtrkTree = new TTree("fullTrkTree","Track Tree 2");
    newtrkTree->SetMaxTreeSize(MAXTREESIZE);
@@ -326,7 +330,7 @@ void forest2diJetSkim_new2(
        //if(TMath::Abs(jteta[a]) < 2.4 && jtpt[a] > minjPt)
        //
        if(TMath::Abs(jteta[a]) > 2.4) // Should still have eta cut 
-	 conitnue ;
+	 continue ;
        
        // From here now, do not introduce any other cuts until the loop is over. 
        jetpt.push_back(jtpt[a]);
@@ -416,21 +420,20 @@ void forest2diJetSkim_new2(
       dj.eta2 = eta[1];
       dj.phi2 = phi[1];
       //dj.e2 = e[1];
-   }
-
-   eventTree->Fill();
-   djTree->Fill();
-   trkTree->Fill();   
-   newtrkTree->Fill(); 
-   jetpt.clear(); 
-} //end of event loop
+      
+      eventTree->Fill();
+      djTree->Fill();
+      trkTree->Fill();   
+      newtrkTree->Fill(); 
+      jetpt.clear(); 
+   } //end of event loop
    // *==*==*==*==*==*==* Output file  *==*==*==*==*==*==* //
-//   cout << numevt << endl;
+   //   cout << numevt << endl;
    newtrkTree->Write();
    trkTree->Write();
    djTree->Write();
    eventTree->Write();
-
+   
    newfile->Close();
 } 
 
