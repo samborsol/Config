@@ -223,7 +223,7 @@ void forest2diJetSkim_new2(
 
    Int_t numevt = 0;
    if(nevt == -1) nevt = t->GetEntries(); 
-   for (int iev=0; iev<500000; iev++) {
+   for (int iev=0; iev<nevt; iev++) {
      if(iev%10000==0)
      { 
        cout << ">>>>> EVENT " << iev << " / " << t->GetEntries() <<  " ("<<(int)(100.*iev/t->GetEntries()) << "%)" << endl; 
