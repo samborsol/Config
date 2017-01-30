@@ -33,10 +33,16 @@ void analysis_rapidityGap( ) {
   TCut fwdHFcut = "(evt.hfplus > 5) && (evt.hfminus < 5) ";
   TCut bwdHFcut = "(evt.hfplus < 5) && (evt.hfminus > 5) ";
 
+  Track->SetAlias("nTrkAllEta", "nTrketam2to2p5 + nTrketam1p5to2 + nTrketam1to1p5 + nTrketam0p5to1 + nTrketam0to0p5 + nTrketa0to0p5 + nTrketa0p5to1 + nTrketa1to1p5 + nTrketa1p5to2 + nTrketa2to2p5");
   Track->SetAlias("nTrkBelow15", "nTrketam2to2p5 + nTrketam1p5to2 + nTrketam1to1p5 + nTrketam0p5to1 + nTrketam0to0p5 + nTrketa0to0p5 + nTrketa0p5to1 + nTrketa1to1p5");
   Track->SetAlias("nTrkBelow10", "nTrketam2to2p5 + nTrketam1p5to2 + nTrketam1to1p5 + nTrketam0p5to1 + nTrketam0to0p5 + nTrketa0to0p5 + nTrketa0p5to1");
   Track->SetAlias("nTrkBelow05", "nTrketam2to2p5 + nTrketam1p5to2 + nTrketam1to1p5 + nTrketam0p5to1 + nTrketam0to0p5 + nTrketa0to0p5");
   Track->SetAlias("nTrkBelow00", "nTrketam2to2p5 + nTrketam1p5to2 + nTrketam1to1p5 + nTrketam0p5to1 + nTrketam0to0p5");
+  Track->SetAlias("nTrkAboveNeg15", "nTrketam1to1p5 + nTrketam0p5to1 + nTrketam0to0p5 + nTrketa0to0p5 + nTrketa0p5to1 + nTrketa1to1p5 + nTrketa1p5to2 + nTrketa2to2p5");
+  Track->SetAlias("nTrkAboveNeg10", "nTrketam0p5to1 + nTrketam0to0p5 + nTrketa0to0p5 + nTrketa0p5to1 + nTrketa1to1p5 + nTrketa1p5to2 + nTrketa2to2p5");
+  Track->SetAlias("nTrkAboveNeg05", "nTrketam0to0p5 + nTrketa0to0p5 + nTrketa0p5to1 + nTrketa1to1p5 + nTrketa1p5to2 + nTrketa2to2p5");
+  Track->SetAlias("nTrkAboveNeg00", "nTrketa0to0p5 + nTrketa0p5to1 + nTrketa1to1p5 + nTrketa1p5to2 + nTrketa2to2p5");
+
   TH1D* nTrkBkwMid[4] ; 
   
 
@@ -70,6 +76,7 @@ void analysis_rapidityGap( ) {
   TH1D* nTrkUpTo05Dijet = (TH1D*)nTrkBkwMid[kAll]->Clone("nTrkUpTo05Dijet");
   TH1D* nTrkUpTo00Dijet = (TH1D*)nTrkBkwMid[kAll]->Clone("nTrkUpTo00Dijet");
   TCut fwdDijetCut = "dijet.pt1>20 && dijet.pt2>20 && dijet.y > 1.5";
+  TCut bwdDijetCut = "dijet.pt1>20 && dijet.pt2>20 && dijet.y < -1.5";
 
   nTrkUpTo15Dijet->Reset();
   nTrkUpTo10Dijet->Reset();
@@ -104,11 +111,22 @@ void analysis_rapidityGap( ) {
   TH1D* aj05= (TH1D*)aj15->Clone("ajNoTrk05");
   TH1D* aj00= (TH1D*)aj15->Clone("ajNoTrk00");
 
-  Track->Draw(Form("dijet.aj>>%s",aj15->GetName()), fwdHFcut && fwdDijetCut && "nTrkBelow15==0");
-  Track->Draw(Form("dijet.aj>>%s",aj10->GetName()), fwdHFcut && fwdDijetCut && "nTrkBelow10==0");
-  Track->Draw(Form("dijet.aj>>%s",aj05->GetName()), fwdHFcut && fwdDijetCut && "nTrkBelow05==0");
-  Track->Draw(Form("dijet.aj>>%s",aj00->GetName()), fwdHFcut && fwdDijetCut && "nTrkBelow00==0");
-  scaleInt(aj15);   scaleInt(aj10);   scaleInt(aj05);   scaleInt(aj00); 
+  //  TCut dphiCut = "dijet.dphi > 2.*3.141502/3.";
+  TCut dphiCut = "";
+  
+  Track->Draw(Form("dijet.aj>>%s",aj15->GetName()), fwdHFcut && fwdDijetCut && "nTrkBelow15==0" && dphiCut);
+  Track->Draw(Form("dijet.aj>>%s",aj10->GetName()), fwdHFcut && fwdDijetCut && "nTrkBelow10==0" && dphiCut);
+  Track->Draw(Form("dijet.aj>>%s",aj05->GetName()), fwdHFcut && fwdDijetCut && "nTrkBelow05==0" && dphiCut);
+  Track->Draw(Form("dijet.aj>>%s",aj00->GetName()), fwdHFcut && fwdDijetCut && "nTrkBelow00==0" && dphiCut);
+
+  Track->Draw(Form("dijet.aj >>+ %s",aj15->GetName()), bwdHFcut && bwdDijetCut && "nTrkAboveNeg15==0" && dphiCut);
+  Track->Draw(Form("dijet.aj >>+ %s",aj10->GetName()), bwdHFcut && bwdDijetCut && "nTrkAboveNeg10==0" && dphiCut);
+  Track->Draw(Form("dijet.aj >>+ %s",aj05->GetName()), bwdHFcut && bwdDijetCut && "nTrkAboveNeg05==0" && dphiCut);
+  Track->Draw(Form("dijet.aj >>+ %s",aj00->GetName()), bwdHFcut && bwdDijetCut && "nTrkAboveNeg00==0" && dphiCut);
+  
+  
+
+  //  scaleInt(aj15);   scaleInt(aj10);   scaleInt(aj05);   scaleInt(aj00); 
   handsomeTH1(aj15,1);
   handsomeTH1(aj10,2);
   handsomeTH1(aj05,4);
@@ -121,4 +139,16 @@ void analysis_rapidityGap( ) {
   cout << "aj10 ave = " << aj10->GetMean() << " +/- " << aj10->GetMeanError() << endl;
   cout << "aj05 ave = " << aj05->GetMean() << " +/- " << aj05->GetMeanError() << endl;
   cout << "aj00 ave = " << aj00->GetMean() << " +/- " << aj00->GetMeanError() << endl;
+
+  cout << " N_AJ>0.10 / N_AJ<0.10: "  << endl;
+  cout << " -2.4 < rapidity gap < 1.5 : " << aj15->Integral(7,20) / aj15->Integral(1,6) << endl;
+  cout << " -2.4 < rapidity gap < 1.0 : " << aj10->Integral(7,20) / aj10->Integral(1,6) << endl;
+  cout << " -2.4 < rapidity gap < 0.5 : " << aj05->Integral(7,20) / aj05->Integral(1,6) << endl;
+  cout << " -2.4 < rapidity gap < 0   : " << aj00->Integral(7,20) / aj00->Integral(1,6) << endl;
+  
+  TH2D* h2 = new TH2D("h2","",10,0,0.5, 20, 0,100);
+  Track->Draw("dijet.mass:dijet.aj>>h2",fwdHFcut && fwdDijetCut && "nTrkBelow15==0");
+  h2->Draw("colz");
+
+  
 }
