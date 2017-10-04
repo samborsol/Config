@@ -104,8 +104,8 @@ class UPCdiJet {
  public:
  UPCdiJet() :
   nJet(-1), mass(-1), pt(-1), y(999), phi(999), eta(999), dphi(-99), dpt(-99), deta(-99), aj(-99),// 7
-  pt1(-1), eta1(-1), phi1(-1),        // 3
-  pt2(-1), eta2(-1), phi2(-1)         // 3
+  pt1(-99), eta1(-99), phi1(-99), e1(-1),       // 3
+  pt2(-99), eta2(-99), phi2(-99), e2(-1)         // 3
   {}
 
   int nJet;
@@ -121,28 +121,34 @@ class UPCdiJet {
   float pt1;
   float eta1;
   float phi1;
+  float e1;
   float pt2;
   float eta2;
   float phi2;
+  float e2;
 
   void clear() {
   nJet = -1; mass = -99; pt = -99; y = -99; phi = -99; eta = -99; dphi=-99; dpt=-99; deta=-99; aj=-99;// 7
-  pt1 = -99; eta1 = -99; phi1 = -99;     // 4
-  pt2 = -99; eta2 = -99; phi2 = -99;     // 4
+  pt1 = -99; eta1 = -99; phi1 = -99; e1 = -99;    // 4
+  pt2 = -99; eta2 = -99; phi2 = -99; e2 = -99;    // 4
   }
 
 };
-TString djBranchString = "nJet/I:mass/F:pt:y:phi:eta:dphi:dpt:deta:aj:pt1:eta1:phi1:pt2:eta2:phi2";
+TString djBranchString = "nJet/I:mass/F:pt:y:phi:eta:dphi:dpt:deta:aj:pt1:eta1:phi1:e1:pt2:eta2:phi2:e2";
 
 class UPCnTrk {
  public:
  UPCnTrk() :
   nTrack(-99),
+  nTrkabsEtaover1p5(-99), nTrkabsEtaunder1p5(-99),
   nTrketa0to0p5(-99), nTrketa0p5to1(-99), nTrketa1to1p5(-99), nTrketa1p5to2(-99), nTrketa2to2p5(-99),
-  nTrketam0to0p5(-99), nTrketam0p5to1(-99), nTrketam1to1p5(-99), nTrketam1p5to2(-99), nTrketam2to2p5(-99)
+  nTrketam0to0p5(-99), nTrketam0p5to1(-99), nTrketam1to1p5(-99), nTrketam1p5to2(-99), nTrketam2to2p5(-99),
+  TrkPhi(-99), TrkEta(-99)
   {}
 
   int nTrack;
+  int nTrkabsEtaover1p5;
+  int nTrkabsEtaunder1p5;
   int nTrketa0to0p5;
   int nTrketa0p5to1;
   int nTrketa1to1p5;
@@ -153,15 +159,19 @@ class UPCnTrk {
   int nTrketam1to1p5;
   int nTrketam1p5to2;
   int nTrketam2to2p5;
+  float TrkPhi;
+  float TrkEta;
 
   void clear() {
   nTrack = 0;
+  nTrkabsEtaover1p5 = 0; nTrkabsEtaunder1p5 = 0;
   nTrketa0to0p5 = 0; nTrketa0p5to1 = 0; nTrketa1to1p5 = 0; nTrketa1p5to2 = 0; nTrketa2to2p5 = 0;
   nTrketam0to0p5 = 0; nTrketam0p5to1 = 0; nTrketam1to1p5 = 0; nTrketam1p5to2 = 0; nTrketam2to2p5 = 0;
+  TrkPhi = -99; TrkEta = -99;
   }
 
 };
-TString nTrkString = "nTrk/I:nTrketa0to0p5:nTrketa0p5to1:nTrketa1to1p5:nTrketa1p5to2:nTrketa2to2p5:nTrketam0to0p5:nTrketam0p5to1:nTrketam1to1p5:nTrketam1p5to2:nTrketam2to2p5"; 
+TString nTrkString = "nTrk/I:nTrkabsEtaover1p5:nTrkabsEtaunder1p5:nTrketa0to0p5:nTrketa0p5to1:nTrketa1to1p5:nTrketa1p5to2:nTrketa2to2p5:nTrketam0to0p5:nTrketam0p5to1:nTrketam1to1p5:nTrketam1p5to2:nTrketam2to2p5/F:TrkPhi:TrkEta"; 
 
 class UPCEvent { 
  public:
