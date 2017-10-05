@@ -17,31 +17,43 @@ static const long MAXTREESIZE = 10000000000;
 bool arrange(float i, float j) {return (i>j);}
 TString getDayAndTime();
 
-void forest2diJetSkim_new2(
-			   TString fname = "Hiforest_fraction.root",
-			   TString outputFname = "upcDiJetSkim170124", 
+void forest2diJetSkim_PbPb(
+			   TString fname = "/u/user/bekim/758p3_UPC/src/Muon_test/HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1_PbPbreco_withZDC.root",
+			   TString outputFname = "upcDiJetSkim170919", 
 			   TString trig = "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1",  // "HLT_HIUPCL1SingleEG5NotHF2_v1",    // "HLT_HIUPCSingleEG5NotHF2Pixel_SingleTrack_v1" //  "HLT_HIUPCL1SingleEG5NotHF2_v1"
-			   TString jetCollection = "ak5PFJetAnalyzer", // "akPu5PFJetAnalyzer",
+			   TString jetCollection = "ak4PFJetAnalyzer", // "akPu5PFJetAnalyzer",
 			   float minjPt = 0,
 			   int nevt=-1
 			   ) {  
   
   using namespace std;
   TFile *f1 = new TFile(fname.Data());
+
+  TFile *f2 = new TFile("h_eff.root");
+  TH1F *heff = (TH1F*)f2->Get("h4");
   
   TTree *HltTree = (TTree*)f1->Get("hltanalysis/HltTree");
   TTree *hiTree  = (TTree*)f1->Get("hiEvtAnalyzer/HiTree");
   TTree *trackTree = (TTree*)f1->Get("anaTrack/trackTree");
   TTree *t = (TTree*)f1->Get(Form("%s/t",jetCollection.Data()));
-  //  TTree *trackTree  = (TTree*)f1->Get("ppTrack/trackTree");
+//  TTree *trackTree  = (TTree*)f1->Get("ppTrack/trackTree");
+//  TTree *hbhe = (TTree*)f1->Get("rechitanalyzer/hbhe");
+//  TTree *hf = (TTree*)f1->Get("rechitanalyzer/hf");
+//  TTree *ee = (TTree*)f1->Get("rechitanalyzer/ee");
+//  TTree *eb = (TTree*)f1->Get("rechitanalyzer/eb");
   //  TTree *akpu5pf = (TTree*)f1->Get("t");
   //  TTree *pfTree  = (TTree*)f1->Get("pfcandAnalyzer/pfTree");
   TString dayTime = getDayAndTime();
-  TFile* newfile = new TFile(Form("skimmedFiles/%s_trig%s_jetCollection%s_minJetPt%d_%s.root",outputFname.Data(), trig.Data(), jetCollection.Data(), (int)minjPt, dayTime.Data()  ),"recreate");
-   
+  TFile* newfile = new TFile(Form("skimmedFiles/TrkCutsPbPbreco_%s_trig%s_jetCollection%s_minJetPt%d_%s.root",outputFname.Data(), trig.Data(), jetCollection.Data(), (int)minjPt, dayTime.Data()  ),"recreate");
+//  TFile* newfile = new TFile(Form("skimmedFiles/test.root",outputFname.Data(), trig.Data(    ), jetCollection.Data(), (int)minjPt, dayTime.Data()  ),"recreate");  
+
   t->AddFriend(HltTree);
   t->AddFriend(hiTree);
   t->AddFriend(trackTree);
+//  t->AddFriend(hbhe);
+//  t->AddFriend(hf);
+//  t->AddFriend(ee);
+//  t->AddFriend(eb);
    // import the tree to the RooDataSet
    Int_t           trigBit;
    TBranch        *b_trigBit;
@@ -59,6 +71,16 @@ void forest2diJetSkim_new2(
   ULong64_t       Event;
   TBranch        *b_Event;   //!
   HltTree->SetBranchAddress("Event", &Event, &b_Event);
+
+  UInt_t          run;
+  ULong64_t       evt;
+  UInt_t          lumi;
+  TBranch        *b_run;   
+  TBranch        *b_evt;   
+  TBranch        *b_lumi;
+  hiTree->SetBranchAddress("run", &run, &b_run);
+  hiTree->SetBranchAddress("evt", &evt, &b_evt);
+  hiTree->SetBranchAddress("lumi", &lumi, &b_lumi);
 
   /// Photon inputs : 
 /*  Int_t           nPFpart;
@@ -99,21 +121,19 @@ void forest2diJetSkim_new2(
   Float_t jty[200] = {0};
   Float_t jtphi[200] = {0};
   Float_t jtm[200] = {0};
-  Float_t jtenergy[200] = {0};
   Float_t jtmass[200] = {0};
   Float_t pt[200] = {0};
   Float_t eta[200] = {0};
   Float_t y[200] = {0};
   Float_t phi[200] = {0};
   Float_t m[200] = {0};
-  Float_t e[200] = {0};
+//  Float_t e[200] = {0};
   Float_t mass[200] = {0}; 
   Float_t jtpt2[200] = {0};
   Float_t jteta2[200] = {0};
   Float_t jty2[200] = {0};
   Float_t jtphi2[200] = {0};
   Float_t jtm2[200] = {0};
-  Float_t jtenergy2[200] = {0};
   Float_t jtmass2[200] = {0};
   Float_t pt2[200] = {0};
   Float_t eta2[200] = {0};
@@ -129,7 +149,6 @@ void forest2diJetSkim_new2(
   TBranch *b_jty;
   TBranch *b_jtphi;
   TBranch *b_jtm;
-  TBranch *b_jtenergy;
 
   t->SetBranchAddress("nref", &nref, &b_nref);
   t->SetBranchAddress("jtpt", jtpt, &b_jtpt);
@@ -137,7 +156,6 @@ void forest2diJetSkim_new2(
   t->SetBranchAddress("jty", jty, &b_jty);
   t->SetBranchAddress("jtphi", jtphi, &b_jtphi);
   t->SetBranchAddress("jtm", jtm, &b_jtm);
-  t->SetBranchAddress("jtenergy", jtenergy, &b_jtenergy);
 
    // HiTree inputs : 
    Int_t           hiBin;
@@ -163,14 +181,140 @@ void forest2diJetSkim_new2(
    Float_t         trkEta[33885];
    Float_t         trkPhi[33885];
    Float_t         trkPt[33885];
+   Float_t         trkPtError[33885];
+   Bool_t          highPurity[33885];
+   Float_t         trkDxy1[33885];   //[nTrk]
+   Float_t         trkDxyError1[33885];   //[nTrk]
+   Float_t         trkDz1[33885];   //[nTrk]
+   Float_t         trkDzError1[33885];   //[nTrk]
+   UChar_t         trkNHit[33885];
+   Float_t         trkChi2[33885];
+   UChar_t         trkNdof[33885];
+   UChar_t         trkNlayer[33885];
    TBranch        *b_nTrk;   //!
    TBranch        *b_trkEta;
    TBranch        *b_trkPhi;
    TBranch        *b_trkPt;
+   TBranch        *b_trkPtError;
+   TBranch        *b_highPurity;
+   TBranch        *b_trkDxy1;
+   TBranch        *b_trkDxyError1;
+   TBranch        *b_trkDz1;
+   TBranch        *b_trkDzError1;
+   TBranch        *b_trkNHit;
+   TBranch        *b_trkChi2;
+   TBranch        *b_trkNdof;
+   TBranch        *b_trkNlayer;
    trackTree->SetBranchAddress("nTrk", &nTrk, &b_nTrk);
    trackTree->SetBranchAddress("trkEta", trkEta, &b_trkEta);
    trackTree->SetBranchAddress("trkPhi", trkPhi, &b_trkPhi);
    trackTree->SetBranchAddress("trkPt", trkPt, &b_trkPt);
+   trackTree->SetBranchAddress("trkPtError", trkPtError, &b_trkPtError);
+   trackTree->SetBranchAddress("highPurity", highPurity, &b_highPurity);
+   trackTree->SetBranchAddress("trkDxy1", trkDxy1, &b_trkDxy1);
+   trackTree->SetBranchAddress("trkDxyError1", trkDxyError1, &b_trkDxyError1);
+   trackTree->SetBranchAddress("trkDz1", trkDz1, &b_trkDz1);
+   trackTree->SetBranchAddress("trkDzError1", trkDzError1, &b_trkDzError1);
+   trackTree->SetBranchAddress("trkNHit", trkNHit, &b_trkNHit);
+   trackTree->SetBranchAddress("trkChi2", trkChi2, &b_trkChi2);
+   trackTree->SetBranchAddress("trkNdof", trkNdof, &b_trkNdof);
+   trackTree->SetBranchAddress("trkNlayer", trkNlayer, &b_trkNlayer);
+
+/*
+   Int_t           hben;
+   Float_t         hbee[10];   
+   Float_t         hbeet[10];   
+   Float_t         hbeeta[10];   
+   Float_t         hbephi[10];   
+   Float_t         hbeperp[10];   
+   Bool_t          hbeisjet[10];   
+   Int_t           hbedepth[10];   
+   TBranch        *b_hben;   
+   TBranch        *b_hbee;   
+   TBranch        *b_hbeet;   
+   TBranch        *b_hbeeta;   
+   TBranch        *b_hbephi;   
+   TBranch        *b_hbeperp;   
+   TBranch        *b_hbeisjet;   
+   TBranch        *b_hbedepth;   
+   hbhe->SetBranchAddress("n", &hben, &b_hben);
+   hbhe->SetBranchAddress("e", hbee, &b_hbee);
+   hbhe->SetBranchAddress("et", hbeet, &b_hbeet);
+   hbhe->SetBranchAddress("eta", hbeeta, &b_hbeeta);
+   hbhe->SetBranchAddress("phi", hbephi, &b_hbephi);
+   hbhe->SetBranchAddress("perp", hbeperp, &b_hbeperp);
+   hbhe->SetBranchAddress("isjet", hbeisjet, &b_hbeisjet);
+   hbhe->SetBranchAddress("depth", hbedepth, &b_hbedepth); 
+
+   Int_t           hfn;
+   Float_t         hfe[10];
+   Float_t         hfet[10];
+   Float_t         hfeta[10];
+   Float_t         hfphi[10];
+   Float_t         hfperp[10];
+   Bool_t          hfisjet[10];
+   Int_t           hfdepth[10];
+   TBranch        *b_hfn;
+   TBranch        *b_hfe;
+   TBranch        *b_hfet;
+   TBranch        *b_hfeta;
+   TBranch        *b_hfphi;
+   TBranch        *b_hfperp;
+   TBranch        *b_hfisjet;
+   TBranch        *b_hfdepth;
+   hf->SetBranchAddress("n", &hfn, &b_hfn);
+   hf->SetBranchAddress("e", hfe, &b_hfe);
+   hf->SetBranchAddress("et", hfet, &b_hfet);
+   hf->SetBranchAddress("eta", hfeta, &b_hfeta);
+   hf->SetBranchAddress("phi", hfphi, &b_hfphi);
+   hf->SetBranchAddress("perp", hfperp, &b_hfperp);
+   hf->SetBranchAddress("isjet", hfisjet, &b_hfisjet);
+   hf->SetBranchAddress("depth", hfdepth, &b_hfdepth);
+
+   Int_t           een;
+   Float_t         eee[10];
+   Float_t         eeet[10];
+   Float_t         eeeta[10];
+   Float_t         eephi[10];
+   Float_t         eeperp[10];
+   Bool_t          eeisjet[10];
+   TBranch        *b_een;
+   TBranch        *b_eee;
+   TBranch        *b_eeet;
+   TBranch        *b_eeeta;
+   TBranch        *b_eephi;
+   TBranch        *b_eeperp;
+   TBranch        *b_eeisjet;
+   ee->SetBranchAddress("n", &een, &b_een);
+   ee->SetBranchAddress("e", eee, &b_eee);
+   ee->SetBranchAddress("et", eeet, &b_eeet);
+   ee->SetBranchAddress("eta", eeeta, &b_eeeta);
+   ee->SetBranchAddress("phi", eephi, &b_eephi);
+   ee->SetBranchAddress("perp", eeperp, &b_eeperp);
+   ee->SetBranchAddress("isjet", eeisjet, &b_eeisjet);
+
+   Int_t           ebn;
+   Float_t         ebe[10];
+   Float_t         ebet[10];
+   Float_t         ebeta[10];
+   Float_t         ebphi[10];
+   Float_t         ebperp[10];
+   Bool_t          ebisjet[10];
+   TBranch        *b_ebn;
+   TBranch        *b_ebe;
+   TBranch        *b_ebet;
+   TBranch        *b_ebeta;
+   TBranch        *b_ebphi;
+   TBranch        *b_ebperp;
+   TBranch        *b_ebisjet;
+   eb->SetBranchAddress("n", &ebn, &b_ebn);
+   eb->SetBranchAddress("e", ebe, &b_ebe);
+   eb->SetBranchAddress("et", ebet, &b_ebet);
+   eb->SetBranchAddress("eta", ebeta, &b_ebeta);
+   eb->SetBranchAddress("phi", ebphi, &b_ebphi);
+   eb->SetBranchAddress("perp", ebperp, &b_ebperp);
+   eb->SetBranchAddress("isjet", ebisjet, &b_ebisjet);
+*/
 
   ////////////////////////////////////////////////////////////////////////
   //////////////////  dijet tree 
@@ -197,18 +341,121 @@ void forest2diJetSkim_new2(
    trkTree->Branch("trkVar",&Track.nTrack,nTrkString);
 
    int ntrk;
+   float floatntrk;
    const int MAXtrk = 50000; // to accomodate 100 smeared trks, need to be careful with ram
    float trkpt[MAXtrk];
    float trketa[MAXtrk];
    float trkphi[MAXtrk];
+   float trkHFplus;
+   float trkHFminus;
 
    TTree *newtrkTree = new TTree("fullTrkTree","Track Tree 2");
    newtrkTree->SetMaxTreeSize(MAXTREESIZE);
    newtrkTree->Branch("ntrk",&ntrk,"ntrk/I");
-   newtrkTree->Branch("pt",trkpt,"pt[ntrk]/F");
-   newtrkTree->Branch("eta",trketa,"eta[ntrk]/F");
-   newtrkTree->Branch("phi",trkphi,"phi[ntrk]/F");
+   newtrkTree->Branch("floatntrk",&floatntrk,"floatntrk/F");
+   newtrkTree->Branch("pT",trkpt,"pT[ntrk]/F");
+   newtrkTree->Branch("Eta",trketa,"Eta[ntrk]/F");
+   newtrkTree->Branch("Phi",trkphi,"Phi[ntrk]/F");
+   newtrkTree->Branch("trkHFplus",&trkHFplus,"trkHFplus/F");
+   newtrkTree->Branch("trkHFminus",&trkHFminus,"trkHFminus/F");
 
+/*
+   Int_t           HBHEn;
+   Float_t         HBHEe[10];   
+   Float_t         HBHEeraw[10];   
+   Float_t         HBHEet[10];   
+   Float_t         HBHEeta[10];   
+   Float_t         HBHEphi[10];   
+   Float_t         HBHEperp[10];   
+   Bool_t          HBHEisjet[10];   
+   Int_t           HBHEdepth[10];   
+
+   TTree *HBHETree = new TTree("HBHE","HBHE Tree");
+   HBHETree->SetMaxTreeSize(MAXTREESIZE);
+   HBHETree->Branch("HBHEn",&HBHEn,"HBHEn/I");
+   HBHETree->Branch("HBHEe",HBHEe,"HBHEe/F");
+   HBHETree->Branch("HBHEeraw",HBHEeraw,"HBHEeraw/F");
+   HBHETree->Branch("HBHEeta",HBHEeta,"HBHEeta/F");
+   HBHETree->Branch("HBHEphi",HBHEphi,"HBHEphi/F");
+   HBHETree->Branch("HBHEperp",HBHEperp,"HBHEperp/F");
+   HBHETree->Branch("HBHEisjet",HBHEisjet,"HBHEisjet/F");
+   HBHETree->Branch("HBHEdepth",HBHEdepth,"HBHEdepth/F"); 
+
+   Int_t           HFn;
+   Float_t         HFe[10];
+   Float_t         HFet[10];
+   Float_t         HFeta[10];
+   Float_t         HFphi[10];
+   Float_t         HFperp[10];
+   Bool_t          HFisjet[10];
+   Int_t           HFdepth[10];
+
+   TTree *HFTree = new TTree("HF","HF Tree");
+   HFTree->SetMaxTreeSize(MAXTREESIZE);
+   HFTree->Branch("HFn",&HFn,"HFn/I");
+   HFTree->Branch("HFe",HFe,"HFe/F");
+   HFTree->Branch("HFeta",HFeta,"HFeta/F");
+   HFTree->Branch("HFphi",HFphi,"HFphi/F");
+   HFTree->Branch("HFperp",HFperp,"HFperp/F");
+   HFTree->Branch("HFisjet",HFisjet,"HFisjet/F");
+   HFTree->Branch("HFdepth",HFdepth,"HFdepth/F");
+
+   Int_t           EEn;
+   Float_t         EEe[10];
+   Float_t         EEet[10];
+   Float_t         EEeta[10];
+   Float_t         EEphi[10];
+   Float_t         EEperp[10];
+   Bool_t          EEisjet[10];
+
+   TTree *EETree = new TTree("EE","EE Tree");
+   EETree->SetMaxTreeSize(MAXTREESIZE);
+   EETree->Branch("EEn",&EEn,"EEn/I");
+   EETree->Branch("EEe",EEe,"EEe/F");
+   EETree->Branch("EEeta",EEeta,"EEeta/F");
+   EETree->Branch("EEphi",EEphi,"EEphi/F");
+   EETree->Branch("EEperp",EEperp,"EEperp/F");
+   EETree->Branch("EEisjet",EEisjet,"EEisjet/F");
+
+   Int_t           EBn;
+   Float_t         EBe[10];
+   Float_t         EBet[10];
+   Float_t         EBeta[10];
+   Float_t         EBphi[10];
+   Float_t         EBperp[10];
+   Bool_t          EBisjet[10];
+
+   TTree *EBTree = new TTree("EB","EB Tree");
+   EBTree->SetMaxTreeSize(MAXTREESIZE);
+   EBTree->Branch("EBn",&EBn,"EBn/I");
+   EBTree->Branch("EBe",EBe,"EBe/F");
+   EBTree->Branch("EBeta",EBeta,"EBeta/F");
+   EBTree->Branch("EBphi",EBphi,"EBphi/F");
+   EBTree->Branch("EBperp",EBperp,"EBperp/F");
+   EBTree->Branch("EBisjet",EBisjet,"EBisjet/F");
+
+   Int_t bin1;
+   Int_t bin2;
+   Float_t pT1;
+   Float_t pT2;
+   Float_t eff1;
+   Float_t eff2;
+   Float_t w1;
+   Float_t w2;
+   Float_t DjpT;
+
+   TTree *CSTree = new TTree("CS","CS Tree");
+   CSTree->SetMaxTreeSize(MAXTREESIZE);
+   CSTree->Branch("bin1",&bin1,"bin1/I");
+   CSTree->Branch("bin2",&bin2,"bin2/I");
+   CSTree->Branch("pT1",&pT1,"pT1/F");
+   CSTree->Branch("pT2",&pT2,"pT2/F");
+   CSTree->Branch("eff1",&eff1,"eff1/F");
+   CSTree->Branch("eff2",&eff2,"eff2/F");
+   CSTree->Branch("w1",&w1,"w1/F");
+   CSTree->Branch("w2",&w2,"w2/F");
+   CSTree->Branch("DjpT",&DjpT,"DjpT/F");
+*/
    Int_t d_phi;
 
    vector<float> jetpt;
@@ -240,21 +487,55 @@ void forest2diJetSkim_new2(
      // trigger selection 
 
      ///// Call the values /////
-     
+//     pT1 = 0;
+//     pT2 = 0;
+//     w1 = 0;
+//     w2 = 0;
+//     eff1 = 0;
+//     eff2 = 0;
+//     bin1 = 0;
+//     bin2 = 0;
+//     DjpT = 0;    
+ 
      event.clear();
-     event.run = Run;
-     event.lumi = LumiBlock;
-     event.event = Event; 
+     event.run = run;
+     event.lumi = lumi;
+     event.event = evt; 
      event.vz = -99;
      event.hfsum = hiHF; 
      event.hfplus = hiHFplus; 
-     event.hfminus = hiHFminus; 
-     
+     event.hfminus = hiHFminus;    
+
+     if(Run==262988 && LumiBlock==663 && Event==89487086)
+     {
+       cout << "262988 : 663 : 89487086  hfsum: " << hiHF << endl;
+     }
+     if(Run==262988 && LumiBlock==663 && Event==89469683)
+     {
+       cout << "262988 : 663 : 89469683  hfsum: " << hiHF << endl;
+     }
+     if(Run==262988 && LumiBlock==663 && Event==89482692)
+     {
+       cout << "262988 : 663 : 89482692  hfsum: " << hiHF << endl;
+     }
+     if(Run==262988 && LumiBlock==663 && Event==89472230)
+     {
+       cout << "262988 : 663 : 89472230  hfsum: " << hiHF << endl;
+     }
+     if(Run==262988 && LumiBlock==663 && Event==89553231)
+     {
+       cout << "262988 : 663 : 89553231  hfsum: " << hiHF << endl;
+     }
+
+ 
      dj.clear();
 
      Track.clear();
      Track.nTrack = 0;
-     ntrk = 0 ;
+     ntrk = 0;
+     floatntrk = 0;
+     trkHFplus = hiHFplus;
+     trkHFminus = hiHFminus;
      for(Int_t c = 0; c != nTrk; c++)
      {
        // Yongsun:  Here is where the quality cuts of trak will enter.
@@ -266,13 +547,24 @@ void forest2diJetSkim_new2(
        //
        // From now you should not make any cut below :
 
+       if(highPurity[c] == 1 && trkPt[c] > 0.2 && trkPtError[c]/trkPt[c] < 0.1 && fabs(trkDz1[c]/trkDzError1[c]) < 3 && fabs(trkDxy1[c]/trkDxyError1[c]) < 3 && trkNHit[c] >= 11 && trkChi2[c]/(float)trkNdof[c]/(float)trkNlayer[c] < 0.15)
+       {
        trketa[ntrk] = trkEta[c];
        trkphi[ntrk] = trkPhi[c];
        trkpt[ntrk] = trkPt[c];
-       ntrk = ntrk + 1 ;
+       ntrk = ntrk + 1;
+       floatntrk = (float)ntrk;
 
        Track.nTrack = Track.nTrack + 1;
 
+       if(fabs(trkEta[c]) > 1.5)
+       {
+         Track.nTrkabsEtaover1p5 = Track.nTrkabsEtaover1p5 + 1;
+       }
+       if(fabs(trkEta[c]) < 1.5)
+       {
+         Track.nTrkabsEtaunder1p5 = Track.nTrkabsEtaunder1p5 + 1;
+       }
        if(trkEta[c] >= -2.5 && trkEta[c] < -2.0)
        {
          Track.nTrketam2to2p5 = Track.nTrketam2to2p5 + 1;
@@ -313,9 +605,13 @@ void forest2diJetSkim_new2(
        {
          Track.nTrketa2to2p5 = Track.nTrketa2to2p5 + 1 ;
        }
-
+       }
+       else
+       {
+         continue;
+       }
      }
-     
+
      numjt = 0;
 
      jetpt.clear();
@@ -341,9 +637,14 @@ void forest2diJetSkim_new2(
      }
      
      if ( numjt == 0 )  { 
-       jtpt2[0] = -1 ;
-       jtpt2[1] = -1 ;
-
+       jtpt2[0] = -1;
+       jteta2[0] = -1;
+       jtphi2[0] = -1;
+       jtm2[0] = -1;
+       jtpt2[1] = -1;
+       jteta2[1] = -1;
+       jtphi2[1] = -1;
+       jtm2[1] = -1;
      }
      else if ( numjt == 1 ) { 
        jtpt2[0] = jetpt[0];
@@ -351,8 +652,10 @@ void forest2diJetSkim_new2(
        jtphi2[0] = jetphi[0];
        jtm2[0]   = jetmass[0];
 
-       jtpt2[1] = -1 ;
-
+       jtpt2[1] = -1;
+       jteta2[1] = -1;
+       jtphi2[1] = -1;
+       jtm2[1] = -1;
      }
      else {     // if numjt > 1 
        sort(jetpt.begin(), jetpt.end(), arrange);
@@ -369,10 +672,15 @@ void forest2diJetSkim_new2(
 	   jtpt2[1] = jtpt[b];
 	   jteta2[1] = jteta[b];
 	   jtphi2[1] = jtphi[b];
-	jtm2[1] = jtm[b];
+     jtm2[1] = jtm[b];
 	 }
        }
      }
+
+//     jetpt.clear();
+//     jeteta.clear();
+//     jetphi.clear();
+//     jetmass.clear();
      
      d_phi = 0;
      d_phi = TMath::Abs(getDPHI(jtphi2[0], jtphi2[1]));
@@ -389,12 +697,10 @@ void forest2diJetSkim_new2(
       pt[0] = jtpt2[0];
       eta[0] = jteta2[0];
       phi[0] = jtphi2[0];
-      //e[0] = jtenergy2[0];
       mass[0] = jtm2[0];
       pt[1] = jtpt2[1];
       eta[1] = jteta2[1];
       phi[1] = jtphi2[1];
-      //e[1] = jtenergy2[1];
       mass[1] = jtm2[1];
       
       TLorentzVector jt1vec, jt2vec, djvec;
@@ -415,20 +721,43 @@ void forest2diJetSkim_new2(
       dj.pt1 = pt[0];
       dj.eta1 = eta[0];
       dj.phi1 = phi[0];
-      //dj.e1 = e[0];
+      dj.e1 = jt1vec.E();
       dj.pt2 = pt[1];
       dj.eta2 = eta[1];
       dj.phi2 = phi[1];
-      //dj.e2 = e[1];
-      
+      dj.e2 = jt2vec.E();
+    
+//      pT1 = jtpt2[0];
+//      pT2 = jtpt2[1]; 
+//      bin1 = heff->FindBin(pt[0]);
+//      eff1 = heff->GetBinContent(bin1);
+//      w1 = 1/eff1;
+//      bin2 = heff->FindBin(pt[1]);
+//      eff2 = heff->GetBinContent(bin2);
+//      w2 = 1/eff2;
+//      DjpT = djvec.Pt();
+   
       eventTree->Fill();
       djTree->Fill();
       trkTree->Fill();   
-      newtrkTree->Fill(); 
-      jetpt.clear(); 
+      newtrkTree->Fill();
+//      HBHETree->Fill();
+//      HFTree->Fill();
+//      EETree->Fill();
+//      EBTree->Fill();
+//      CSTree->Fill(); 
+      jetpt.clear();
+      jeteta.clear();
+      jetphi.clear();
+      jetmass.clear(); 
    } //end of event loop
    // *==*==*==*==*==*==* Output file  *==*==*==*==*==*==* //
    //   cout << numevt << endl;
+//   CSTree->Write();
+//   EBTree->Write();
+//   EETree->Write();
+//   HFTree->Write();
+//   HBHETree->Write();
    newtrkTree->Write();
    trkTree->Write();
    djTree->Write();
